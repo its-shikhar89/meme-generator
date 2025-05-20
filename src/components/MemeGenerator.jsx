@@ -16,7 +16,6 @@ function MemeGenerator() {
   });
   const [allMemes, setAllMemes] = useState([]);
   const memeRef = useRef(null);
-  const [imageLoaded, setImageLoaded] = useState(false);
 
   const filters = {
     none: '',
@@ -34,14 +33,9 @@ function MemeGenerator() {
       .then(data => setAllMemes(data.data.memes));
   }, []);
 
-  function getProxiedImageUrl(url) {
-    return `https://corsproxy.io/?${encodeURIComponent(url)}`;
-  }
-
   function getMemeImage() {
     const randomNumber = Math.floor(Math.random() * allMemes.length);
     const url = allMemes[randomNumber].url;
-    setImageLoaded(false);
     setMeme(prevMeme => ({
       ...prevMeme,
       randomImage: url
@@ -79,18 +73,14 @@ function MemeGenerator() {
   }
 
   async function downloadMeme() {
-    if (!imageLoaded) {
-      alert('Please wait for the meme image to load before downloading.');
-      return;
-    }
     const element = memeRef.current;
     try {
       const canvas = await html2canvas(element, {
         useCORS: true,
         allowTaint: true,
         backgroundColor: null,
-        scale: 2,
-        logging: false,
+        scale: 2, // Increase quality
+        logging: true,
       });
       const image = canvas.toDataURL('image/png', 1.0);
       const link = document.createElement('a');
@@ -170,7 +160,7 @@ function MemeGenerator() {
       <div className="meme" ref={memeRef}>
         <div className="meme-container" style={{ position: 'relative', display: 'inline-block' }}>
           <img
-            src={getProxiedImageUrl(meme.randomImage)}
+            src={meme.randomImage}
             alt="Meme"
             className="meme-image"
             style={{
@@ -179,8 +169,6 @@ function MemeGenerator() {
               display: 'block'
             }}
             crossOrigin="anonymous"
-            onLoad={() => setImageLoaded(true)}
-            onError={() => setImageLoaded(false)}
           />
           {meme.texts.map(text => (
             <h2
