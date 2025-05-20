@@ -16,6 +16,7 @@ function MemeGenerator() {
   });
   const [allMemes, setAllMemes] = useState([]);
   const memeRef = useRef(null);
+  const [imageLoaded, setImageLoaded] = useState(false);
 
   const filters = {
     none: '',
@@ -33,9 +34,14 @@ function MemeGenerator() {
       .then(data => setAllMemes(data.data.memes));
   }, []);
 
+  function getProxiedImageUrl(url) {
+    return `https://corsproxy.io/?${encodeURIComponent(url)}`;
+  }
+
   function getMemeImage() {
     const randomNumber = Math.floor(Math.random() * allMemes.length);
     const url = allMemes[randomNumber].url;
+    setImageLoaded(false);
     setMeme(prevMeme => ({
       ...prevMeme,
       randomImage: url
@@ -73,12 +79,29 @@ function MemeGenerator() {
   }
 
   async function downloadMeme() {
-    const canvas = await html2canvas(memeRef.current);
-    const image = canvas.toDataURL('image/png');
-    const link = document.createElement('a');
-    link.href = image;
-    link.download = 'my-meme.png';
-    link.click();
+    if (!imageLoaded) {
+      alert('Please wait for the meme image to load before downloading.');
+      return;
+    }
+    const element = memeRef.current;
+    try {
+      const canvas = await html2canvas(element, {
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: null,
+        scale: 2,
+        logging: false,
+      });
+      const image = canvas.toDataURL('image/png', 1.0);
+      const link = document.createElement('a');
+      link.href = image;
+      link.download = 'meme.png';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error('Error generating meme:', error);
+    }
   }
 
   return (
@@ -145,23 +168,45 @@ function MemeGenerator() {
       </div>
 
       <div className="meme" ref={memeRef}>
-        <div className="meme-container">
+        <div className="meme-container" style={{ position: 'relative', display: 'inline-block' }}>
           <img
-            src={meme.randomImage}
+            src={getProxiedImageUrl(meme.randomImage)}
             alt="Meme"
             className="meme-image"
-            style={{ filter: filters[meme.filter] }}
+            style={{
+              filter: filters[meme.filter],
+              maxWidth: '100%',
+              display: 'block'
+            }}
+            crossOrigin="anonymous"
+            onLoad={() => setImageLoaded(true)}
+            onError={() => setImageLoaded(false)}
           />
           {meme.texts.map(text => (
             <h2
               key={text.id}
               className="meme-text"
               style={{
+                position: 'absolute',
                 fontSize: `${text.fontSize}px`,
                 fontFamily: text.fontFamily,
                 left: `${text.x}%`,
                 top: `${text.y}%`,
-                transform: 'translate(-50%, -50%)'
+                transform: 'translate(-50%, -50%)',
+                margin: 0,
+                padding: '0 5px',
+                textAlign: 'center',
+                color: 'white',
+                textShadow: `
+                  2px 2px 0 #000,
+                  -2px -2px 0 #000,
+                  2px -2px 0 #000,
+                  -2px 2px 0 #000,
+                  0 2px 0 #000,
+                  2px 0 0 #000,
+                  0 -2px 0 #000,
+                  -2px 0 0 #000
+                `
               }}
             >
               {text.content}
