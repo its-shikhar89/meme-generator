@@ -1,0 +1,45 @@
+
+Project Name: Meme Generator
+Framework: React.js with Vite.js
+
+Overview:
+The Meme Generator is a fun and interactive web application that allows users to create custom memes by selecting random meme templates and adding their own text at the top and bottom of the image. It fetches meme templates from a public API and renders them dynamically with user-provided text.
+
+Project Setup:
+- Created using Vite.js for fast development and hot module reloading.
+- React is used to manage UI and state using functional components and hooks.
+- Project initialized using: `npm create vite@latest meme-generator -- --template react`
+
+Key Features:
+1. Random Meme Generator:
+   - Fetches a list of meme templates from the Imgflip public API (`https://api.imgflip.com/get_memes`).
+   - Displays a new random meme image on each button click.
+
+2. Custom Text Input:
+   - Users can input custom text for both the top and bottom of the meme.
+   - Text is dynamically rendered on the meme image.
+
+3. Functional React Component:
+   - The main logic is inside a functional component named `MemeGenerator`.
+   - Utilizes `useState` for managing text and selected meme image.
+   - Uses `useEffect` to fetch meme data from the API when the component mounts.
+
+Folder Structure:
+/meme-generator
+├── public/
+├── src/
+│   ├── components/
+│   │   └── MemeGenerator.jsx
+│   ├── App.jsx
+│   ├── main.jsx
+│   └── App.css
+└── index.html
+
+Future Improvements:
+- Allow users to download their custom memes.
+- Enable uploading custom images.
+- Add meme font customization options.
+- Use a backend for saving meme history or sharing features.
+
+Conclusion:
+This project is a simple yet powerful introduction to React and Vite.js, demonstrating API integration, state management, and dynamic UI rendering. It’s ideal for beginners who want hands-on experience with React hooks and component-based architecture.
